@@ -1,0 +1,26 @@
+Bitspace Loader
+
+A cross platform uploader for http://bitspace.at
+
+Author:
+    Casey Link <unnamedrambler@gmail.com>
+
+License:
+    GNU GPL v3 or later
+
+Project Homepage:
+    http://github.com/Ramblurr/Bitspace-Loader
+
+Dependencies:
+    CMake >= 2.6
+    Qt >= 4.6
+    libbitspace development version (http://github.com/Ramblurr/libbitspace)
+
+To Build:
+    cd loader
+    mkdir build
+    cd build
+    cmake -DCMAKE_INSTALL_PREFIX=/path/to/place/to/install ../
+    make
+    make install
+
