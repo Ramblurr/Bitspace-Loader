@@ -1,5 +1,5 @@
 Bitspace Loader
-
+===============
 A cross platform uploader for http://bitspace.at
 
 Author:
@@ -11,12 +11,14 @@ License:
 Project Homepage:
     http://github.com/Ramblurr/Bitspace-Loader
 
-Dependencies:
+Dependencies
+============
     CMake >= 2.6
     Qt >= 4.6
     libbitspace development version (http://github.com/Ramblurr/libbitspace)
 
-To Build:
+To Build
+========
     cd loader
     mkdir build
     cd build
