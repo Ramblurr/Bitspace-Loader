@@ -13,53 +13,18 @@
  * You should have received a copy of the GNU General Public License along with         *
  * this program.  If not, see <http://www.gnu.org/licenses/>.                           *
  ****************************************************************************************/
-#include "ConfigDialog.h"
-#include "ui_ConfigDialog.h"
+#ifndef FILEDELEGATE_H
+#define FILEDELEGATE_H
 
-#include <QSettings>
-#include <QPushButton>
+#include <QStyledItemDelegate>
 
-ConfigDialog::ConfigDialog(QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::ConfigDialog)
+class FileDelegate : public QStyledItemDelegate
 {
-    ui->setupUi(this);
-    QSettings settings;
-    QString token = settings.value( "apitoken", ui->lineEdit->text() ).toString();
-    ui->lineEdit->setText( token );
-    on_lineEdit_textChanged(token);
-}
+public:
+    FileDelegate( QWidget *parent = 0 ) : QStyledItemDelegate( parent ) {}
+    virtual void paint( QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const;
+    virtual QSize sizeHint( const QStyleOptionViewItem& option, const QModelIndex& index ) const;
 
-ConfigDialog::~ConfigDialog()
-{
-    delete ui;
-}
+};
 
-void ConfigDialog::changeEvent(QEvent *e)
-{
-    QDialog::changeEvent(e);
-    switch (e->type()) {
-    case QEvent::LanguageChange:
-        ui->retranslateUi(this);
-        break;
-    default:
-        break;
-    }
-}
-
-void ConfigDialog::on_lineEdit_textChanged(QString token)
-{
-    Q_UNUSED(token)
-    if( ui->lineEdit->text().trimmed().isEmpty() )
-        ui->buttonBox->button( QDialogButtonBox::Ok )->setEnabled( false );
-    else
-        ui->buttonBox->button( QDialogButtonBox::Ok )->setEnabled( true );
-
-}
-
-void ConfigDialog::on_buttonBox_accepted()
-{
-    QSettings settings;
-    settings.setValue( "apitoken", ui->lineEdit->text().trimmed() );
-    settings.sync();
-}
+#endif // FILEDELEGATE_H

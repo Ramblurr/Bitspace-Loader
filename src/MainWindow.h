@@ -38,16 +38,20 @@ public:
 protected:
     void changeEvent(QEvent *e);
 
+public slots:
+    void slotStartNextJob();
+
 private slots:
     void on_actionOptions_triggered();
     void on_actionQuit_triggered();
     void slotAddFiles();
     void slotAddFolders();
-    void slotUpload();
     void slotUploadProgress( qint64, qint64 );
+    void slotUploadFinished();
     void slotOptionsChanged();
 private:
     void setupActions();
+    void addFile( const QString & file );
     QStringList nameFilters() const;
     Ui::MainWindow *ui;
 

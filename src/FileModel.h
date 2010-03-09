@@ -51,7 +51,13 @@ public:
     virtual bool insertRows( int position, int rows, const QModelIndex &index=QModelIndex() );
     virtual bool removeRows( int position, int rows, const QModelIndex &index=QModelIndex() );
 
-    QStringList getList() const;
+    /**
+      * returns a QModelIndex for the file name. the column defaults to 1, which
+      * will be the index for the ItemState
+      */
+    QModelIndex indexOf( const QString &file, int column = 1 ) const;
+    QStringList getAll() const;
+    QStringList getPending() const;
 
 signals:
 

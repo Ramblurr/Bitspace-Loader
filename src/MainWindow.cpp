@@ -74,7 +74,16 @@ void MainWindow::setupActions()
 
     connect( m_addFiles, SIGNAL( triggered() ), SLOT( slotAddFiles() ) );
     connect( m_addFolders, SIGNAL( triggered() ), SLOT( slotAddFolders() ) );
-    connect( m_upload, SIGNAL( triggered() ), SLOT( slotUpload() ) );
+    connect( m_upload, SIGNAL( triggered() ), SLOT( slotStartNextJob() ) );
+}
+
+void MainWindow::addFile( const QString &file )
+{
+    m_model->insertRows( 0, 1, QModelIndex() );
+    QModelIndex index = m_model->index( 0, 0, QModelIndex() );
+    m_model->setData( index, file, Qt::EditRole );
+    index = m_model->index( 0, 1, QModelIndex() );
+    m_model->setData( index, Bitspace::Pending, Qt::EditRole );
 }
 
 void MainWindow::slotAddFiles()
@@ -91,14 +100,12 @@ void MainWindow::slotAddFiles()
     if( filenames.size() <= 0 )
         return;
 
-    QStringList current_files = m_model->getList();
+    QStringList current_files = m_model->getAll();
     foreach( QString file, filenames )
     {
         if( current_files.contains( file ) )
             continue;
-        m_model->insertRows( 0, 1, QModelIndex() );
-        QModelIndex index = m_model->index( 0, 0, QModelIndex() );
-        m_model->setData( index, file, Qt::EditRole );
+        addFile( file );
     }
 }
 
@@ -122,27 +129,15 @@ void MainWindow::slotAddFolders()
         return;
 
     QDirIterator it( folder_name, nameFilters(), QDir::Files, QDirIterator::Subdirectories);
-    QStringList current_files = m_model->getList();
+    QStringList current_files = m_model->getAll();
     while( it.hasNext() )
     {
         it.next();
         QString file = it.filePath();
         if( current_files.contains( file ) )
             continue;
-        m_model->insertRows( 0, 1, QModelIndex() );
-        QModelIndex index = m_model->index( 0, 0, QModelIndex() );
-        m_model->setData( index, file, Qt::EditRole );
+        addFile( file );
     }
-}
-
-void MainWindow::slotUpload()
-{
-    QStringList current_files = m_model->getList();
-    if( current_files.size() <= 0 )
-        return;
-    bool success = m_uploader->upload(current_files.at(0));
-    if( success  )
-        connect(m_uploader, SIGNAL(uploadProgress(qint64,qint64)), SLOT(slotUploadProgress( qint64, qint64 )));
 }
 
 void MainWindow::slotUploadProgress( qint64 sent, qint64 total)
@@ -196,4 +191,32 @@ void MainWindow::slotOptionsChanged()
     bitspace::setNetworkAccessManager( new QNetworkAccessManager(this) );
     m_uploader = new bitspace::Upload( this );
     m_uploader->startNewSession();
+}
+
+void MainWindow::slotStartNextJob()
+{
+    QStringList pending_files = m_model->getPending();
+    if( pending_files.size() <= 0 )
+        return;
+
+    QString file = pending_files.takeFirst();
+
+    qDebug() << "Starting next job: " << file;
+
+    // change the status for the item
+    QModelIndex index = m_model->indexOf( file );
+    m_model->setData( index, Bitspace::InProgress, Qt::EditRole );
+
+    bool success = m_uploader->upload( file );
+    if( !success  )
+        return; // TODO error handling
+
+    connect(m_uploader, SIGNAL(uploadProgress(qint64,qint64)), SLOT(slotUploadProgress( qint64, qint64 )));
+    connect(m_uploader, SIGNAL(uploadFinished()), SLOT(slotUploadFinished()));
+}
+
+void MainWindow::slotUploadFinished()
+{
+    qDebug() << "MainWindow::slotUploadFinished()";
+    slotStartNextJob();
 }

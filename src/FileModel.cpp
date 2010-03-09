@@ -15,7 +15,9 @@
  ****************************************************************************************/
 #include "FileModel.h"
 
+#include <QApplication>
 #include <QIcon>
+#include <QPalette>
 FileModel::FileModel(QObject *parent) :
     QAbstractTableModel(parent)
 {
@@ -40,6 +42,11 @@ QVariant FileModel::data( const QModelIndex& index, int role ) const
             return stateToString( item.second);
     case Qt::DecorationRole:
         return QIcon::fromTheme("audio-x-generic");
+    case Qt::BackgroundRole:
+        if( item.second == Bitspace::Complete )
+            return Qt::green;
+        else
+            return QApplication::palette().color(QPalette::Base);
     default:
         return QVariant();
     }
@@ -83,10 +90,10 @@ bool FileModel::setData( const QModelIndex &index, const QVariant &value, int ro
         int row = index.row();
         FileItem p = m_list.value( row );
 
-        if ( index.column() != 0 )
-            return false;
-        p.first = value.toString();
-        p.second = p.second == Bitspace::Undefined ? Bitspace::Pending : p.second;
+        if ( index.column() == 0 )
+            p.first = value.toString();
+        else if ( index.column() == 1 )
+            p.second = (Bitspace::ItemStates) value.toInt();
 
         m_list.replace(row, p);
         emit( dataChanged( index, index ) );
@@ -123,12 +130,33 @@ bool FileModel::removeRows( int position, int rows, const QModelIndex &index )
     return true;
 }
 
-QStringList FileModel::getList() const
+QModelIndex FileModel::indexOf( const QString &file, int column ) const
+{
+    for(int i = 0; i < m_list.size(); i++ )
+    {
+        if( m_list.at(i).first == file )
+            return index( i , column, QModelIndex() );
+    }
+    return QModelIndex();
+}
+
+QStringList FileModel::getAll() const
 {
     QStringList files;
     foreach( FileItem item, m_list )
     {
         files << item.first;
+    }
+    return files;
+}
+
+QStringList FileModel::getPending() const
+{
+    QStringList files;
+    foreach( FileItem item, m_list )
+    {
+        if( item.second == Bitspace::Pending )
+            files << item.first;
     }
     return files;
 }
