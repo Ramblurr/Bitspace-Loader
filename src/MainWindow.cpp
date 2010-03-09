@@ -1,0 +1,155 @@
+#include "MainWindow.h"
+#include "ui_MainWindow.h"
+
+#include "FileModel.h"
+
+#include "ws.h" //libbitspace
+#include "upload/Upload.h" //libbitspace
+
+#include <QDir>
+#include <QDirIterator>
+#include <QIcon>
+#include <QFileDialog>
+#include <QDebug>
+
+MainWindow::MainWindow(QWidget *parent) :
+    QMainWindow(parent),
+    ui(new Ui::MainWindow)
+{
+    ui->setupUi(this);
+    setupActions();
+    m_model = new FileModel( this );
+    ui->tableView->setModel( m_model );
+    ui->tableView->horizontalHeader()->setResizeMode( QHeaderView::ResizeToContents );
+
+//    bitspace::ws::ApiToken = "xXxXxXxXxXx";
+    bitspace::ws::Username = "xXxXxXxXxXx";
+    bitspace::ws::Password = "xXxXxXxXxXx";
+    bitspace::setNetworkAccessManager( new QNetworkAccessManager(this) );
+    m_uploader = new bitspace::Upload( this );
+    m_uploader->startNewSession();
+}
+
+MainWindow::~MainWindow()
+{
+    delete ui;
+}
+
+void MainWindow::changeEvent(QEvent *e)
+{
+    QMainWindow::changeEvent(e);
+    switch (e->type()) {
+    case QEvent::LanguageChange:
+        ui->retranslateUi(this);
+        break;
+    default:
+        break;
+    }
+}
+
+void MainWindow::setupActions()
+{
+
+    m_addFiles = new QAction( QIcon::fromTheme("document-open"), "Add Files", this );
+    m_addFolders = new QAction( QIcon::fromTheme("document-open-folder"), "Add Folders", this );
+
+    m_upload = new QAction( QIcon::fromTheme("go-up") , "Start Upload", this );
+
+    ui->mainToolBar->addAction( m_addFiles );
+    ui->mainToolBar->addAction( m_addFolders );
+    ui->mainToolBar->addSeparator();
+    ui->mainToolBar->addAction( m_upload );
+
+    connect( m_addFiles, SIGNAL( triggered() ), SLOT( slotAddFiles() ) );
+    connect( m_addFolders, SIGNAL( triggered() ), SLOT( slotAddFolders() ) );
+    connect( m_upload, SIGNAL( triggered() ), SLOT( slotUpload() ) );
+}
+
+void MainWindow::slotAddFiles()
+{
+    QFileDialog dialog( this );
+    dialog.setFileMode( QFileDialog::ExistingFiles );
+    dialog.setNameFilter( tr( "Audio files (*.mp3 *.m4a *.mp4 *.aac *.ogg *.oga *.wma *.flac)" ) );
+
+    QStringList filenames;
+    if( dialog.exec() )
+    {
+        filenames = dialog.selectedFiles();
+    }
+    if( filenames.size() <= 0 )
+        return;
+
+    QStringList current_files = m_model->getList();
+    foreach( QString file, filenames )
+    {
+        if( current_files.contains( file ) )
+            continue;
+        m_model->insertRows( 0, 1, QModelIndex() );
+        QModelIndex index = m_model->index( 0, 0, QModelIndex() );
+        m_model->setData( index, file, Qt::EditRole );
+    }
+}
+
+void MainWindow::slotAddFolders()
+{
+    QFileDialog dialog( this );
+    dialog.setFileMode( QFileDialog::Directory );
+    dialog.setOption(QFileDialog::ShowDirsOnly, true );
+
+    QStringList folders;
+    if( dialog.exec() )
+    {
+        folders = dialog.selectedFiles();
+    }
+    if( folders.size() <= 0 )
+        return;
+    QString folder_name = folders.at(0);
+    QDir dir( folder_name );
+
+    if( !dir.exists() )
+        return;
+
+    QDirIterator it( folder_name, nameFilters(), QDir::Files, QDirIterator::Subdirectories);
+    QStringList current_files = m_model->getList();
+    while( it.hasNext() )
+    {
+        it.next();
+        QString file = it.filePath();
+        if( current_files.contains( file ) )
+            continue;
+        m_model->insertRows( 0, 1, QModelIndex() );
+        QModelIndex index = m_model->index( 0, 0, QModelIndex() );
+        m_model->setData( index, file, Qt::EditRole );
+    }
+}
+
+void MainWindow::slotUpload()
+{
+    QStringList current_files = m_model->getList();
+    if( current_files.size() <= 0 )
+        return;
+    bool success = m_uploader->upload(current_files.at(0));
+    if( success  )
+        connect(m_uploader, SIGNAL(uploadProgress(qint64,qint64)), SLOT(slotUploadProgress( qint64, qint64 )));
+}
+
+void MainWindow::slotUploadProgress( qint64 sent, qint64 total)
+{
+    qDebug() << "Sent: " << sent << "Total:" << total;
+    double percent = double(sent) / double(total)*100;
+    qDebug() << "Percentage: " << percent;
+}
+
+QStringList MainWindow::nameFilters() const
+{
+    QStringList filters;
+    filters << "*.mp3";
+    filters << "*.m4a";
+    filters << "*.mp4";
+    filters << "*.aac";
+    filters << "*.ogg";
+    filters << "*.oga";
+    filters << "*.wma";
+    filters << "*.flac";
+    return filters;
+}

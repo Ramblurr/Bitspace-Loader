@@ -1,0 +1,11 @@
+*~
+*.so
+*.so.*
+moc_*
+*.o
+*.pro.user
+qrc_*.cpp
+ui_*.h
+Makefile
+tests/
+build/
