@@ -19,6 +19,9 @@ Dependencies
 
 To Build
 ========
+    Edit loader/cmake/modules/FindBitspace.cmake and add the location
+    of libbitspace (see above).
+
     cd loader
     mkdir build
     cd build
