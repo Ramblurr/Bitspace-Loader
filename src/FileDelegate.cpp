@@ -15,14 +15,39 @@
  ****************************************************************************************/
 #include "FileDelegate.h"
 
+#include "FileModel.h"
+#include "MainWindow.h"
+
+#include <QStyleOptionProgressBar>
+#include <QApplication>
+
 void FileDelegate::paint( QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
 {
-    QStyleOptionViewItemV4 opt = option;
-    itemView()->style()->drawPrimitive(QStyle::PE_PanelItemViewItem, &opt, painter, 0);
+    if (index.column() != 1 || (Bitspace::ItemStates) index.data(Bitspace::State).toInt() != Bitspace::InProgress )
+    {
+        QStyledItemDelegate::paint(painter, option, index);
+        return;
+    }
 
+    QStyleOptionProgressBar progressBarOption;
+    progressBarOption.state = QStyle::State_Enabled;
+    progressBarOption.direction = QApplication::layoutDirection();
+    progressBarOption.rect = option.rect;
+    progressBarOption.fontMetrics = QApplication::fontMetrics();
+    progressBarOption.minimum = 0;
+    progressBarOption.maximum = 100;
+    progressBarOption.textAlignment = Qt::AlignCenter;
+    progressBarOption.textVisible = true;
+
+    double progress = qobject_cast<MainWindow *>(parent())->progress();
+    progressBarOption.progress = progress < 0 ? 0 : progress;
+    progressBarOption.text = QString().sprintf("%d%%", progressBarOption.progress);
+
+   // Draw the progress bar onto the view.
+   QApplication::style()->drawControl(QStyle::CE_ProgressBar, &progressBarOption, painter);
 }
 
 QSize FileDelegate::sizeHint( const QStyleOptionViewItem& option, const QModelIndex& index ) const
 {
-
+    return QStyledItemDelegate::sizeHint(option, index);
 }

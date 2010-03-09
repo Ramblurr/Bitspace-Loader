@@ -35,6 +35,8 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+    double progress() const;
+
 protected:
     void changeEvent(QEvent *e);
 
@@ -60,8 +62,9 @@ private:
     QAction* m_upload;
 
     FileModel* m_model;
-
     bitspace::Upload* m_uploader;
+
+    double m_progress;
 };
 
 #endif // MAINWINDOW_H

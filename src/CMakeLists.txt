@@ -5,6 +5,7 @@ include_directories(
 set(loader_SRCS
     ConfigDialog.cpp
     FileModel.cpp
+    FileDelegate.cpp
     MainWindow.cpp
     main.cpp
 )

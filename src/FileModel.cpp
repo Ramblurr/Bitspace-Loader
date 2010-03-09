@@ -47,6 +47,8 @@ QVariant FileModel::data( const QModelIndex& index, int role ) const
             return Qt::green;
         else
             return QApplication::palette().color(QPalette::Base);
+    case Bitspace::State:
+        return item.second;
     default:
         return QVariant();
     }

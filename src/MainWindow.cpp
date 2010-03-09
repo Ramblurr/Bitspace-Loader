@@ -18,6 +18,7 @@
 
 #include "ConfigDialog.h"
 #include "FileModel.h"
+#include "FileDelegate.h"
 
 #include "ws.h" //libbitspace
 #include "upload/Upload.h" //libbitspace
@@ -41,6 +42,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tableView->horizontalHeader()->setResizeMode( QHeaderView::ResizeToContents );
 
    slotOptionsChanged();
+   FileDelegate* delegate = new FileDelegate( this );
+   ui->tableView->setItemDelegate( delegate );
 }
 
 MainWindow::~MainWindow()
@@ -145,6 +148,7 @@ void MainWindow::slotUploadProgress( qint64 sent, qint64 total)
     qDebug() << "Sent: " << sent << "Total:" << total;
     double percent = double(sent) / double(total)*100;
     qDebug() << "Percentage: " << percent;
+    m_progress = percent;
 }
 
 QStringList MainWindow::nameFilters() const
@@ -219,4 +223,9 @@ void MainWindow::slotUploadFinished()
 {
     qDebug() << "MainWindow::slotUploadFinished()";
     slotStartNextJob();
+}
+
+double MainWindow::progress() const
+{
+    return m_progress;
 }
