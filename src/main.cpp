@@ -19,6 +19,9 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+    QCoreApplication::setOrganizationName("Bitspace");
+    QCoreApplication::setOrganizationDomain("bitspace.at");
+    QCoreApplication::setApplicationName("Loader");
     MainWindow w;
 #if defined(Q_WS_S60) || defined(Q_WS_MAEMO_5)
     w.showMaximized();

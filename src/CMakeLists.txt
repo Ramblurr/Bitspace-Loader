@@ -3,17 +3,20 @@ include_directories(
     ${LOADER_INCLUDES}
 )
 set(loader_SRCS
+    ConfigDialog.cpp
     FileModel.cpp
     MainWindow.cpp
     main.cpp
 )
 set(loader_MOC_SRCS
+    ConfigDialog.h
     MainWindow.h
     FileModel.h
 )
 qt4_wrap_cpp(loader_MOC ${loader_MOC_SRCS})
 
 set(loader_UIS
+    ConfigDialog.ui
     MainWindow.ui
 )
 qt4_wrap_ui(loader_UIS_H ${loader_UIS})

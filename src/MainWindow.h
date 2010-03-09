@@ -39,10 +39,13 @@ protected:
     void changeEvent(QEvent *e);
 
 private slots:
+    void on_actionOptions_triggered();
+    void on_actionQuit_triggered();
     void slotAddFiles();
     void slotAddFolders();
     void slotUpload();
     void slotUploadProgress( qint64, qint64 );
+    void slotOptionsChanged();
 private:
     void setupActions();
     QStringList nameFilters() const;

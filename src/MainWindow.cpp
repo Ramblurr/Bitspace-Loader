@@ -16,6 +16,7 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 
+#include "ConfigDialog.h"
 #include "FileModel.h"
 
 #include "ws.h" //libbitspace
@@ -26,6 +27,8 @@
 #include <QIcon>
 #include <QFileDialog>
 #include <QDebug>
+#include <QPointer>
+#include <QSettings>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -37,12 +40,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tableView->setModel( m_model );
     ui->tableView->horizontalHeader()->setResizeMode( QHeaderView::ResizeToContents );
 
-//    bitspace::ws::ApiToken = "xXxXxXxXxXx";
-    bitspace::ws::Username = "xXxXxXxXxXx";
-    bitspace::ws::Password = "xXxXxXxXxXx";
-    bitspace::setNetworkAccessManager( new QNetworkAccessManager(this) );
-    m_uploader = new bitspace::Upload( this );
-    m_uploader->startNewSession();
+   slotOptionsChanged();
 }
 
 MainWindow::~MainWindow()
@@ -65,10 +63,9 @@ void MainWindow::changeEvent(QEvent *e)
 void MainWindow::setupActions()
 {
 
-    m_addFiles = new QAction( QIcon::fromTheme("document-open"), "Add Files", this );
-    m_addFolders = new QAction( QIcon::fromTheme("document-open-folder"), "Add Folders", this );
-
-    m_upload = new QAction( QIcon::fromTheme("go-up") , "Start Upload", this );
+    m_addFiles = new QAction( QIcon::fromTheme("document-open"), tr("Add Files"), this );
+    m_addFolders = new QAction( QIcon::fromTheme("document-open-folder"), tr("Add Folders"), this );
+    m_upload = new QAction( QIcon::fromTheme("go-up") , tr("Start Upload"), this );
 
     ui->mainToolBar->addAction( m_addFiles );
     ui->mainToolBar->addAction( m_addFolders );
@@ -167,4 +164,36 @@ QStringList MainWindow::nameFilters() const
     filters << "*.wma";
     filters << "*.flac";
     return filters;
+}
+
+void MainWindow::on_actionQuit_triggered()
+{
+    qApp->quit();
+}
+
+void MainWindow::on_actionOptions_triggered()
+{
+    QPointer<ConfigDialog> dialog = new ConfigDialog( this );
+    if( dialog->exec() == QDialog::Accepted )
+    {
+        slotOptionsChanged();
+    }
+    delete dialog;
+}
+
+void MainWindow::slotOptionsChanged()
+{
+    QSettings settings;
+    QString apitoken = settings.value( "apitoken" ).toString();
+    if( apitoken.isEmpty() )
+    {
+        on_actionOptions_triggered();
+        return;
+    }
+
+    qDebug() << "token: " << apitoken;
+    bitspace::ws::ApiToken = apitoken;
+    bitspace::setNetworkAccessManager( new QNetworkAccessManager(this) );
+    m_uploader = new bitspace::Upload( this );
+    m_uploader->startNewSession();
 }
