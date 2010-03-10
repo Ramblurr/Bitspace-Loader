@@ -53,6 +53,7 @@ public slots:
 private slots:
     void on_actionOptions_triggered();
     void on_actionQuit_triggered();
+    void on_m_uploadAction_triggered();
     void slotAddFiles();
     void slotAddFolders();
     void slotUploadProgress( qint64, qint64 );

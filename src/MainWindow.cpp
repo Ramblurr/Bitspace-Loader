@@ -103,7 +103,7 @@ void MainWindow::setupActions()
 
     connect( m_addFiles, SIGNAL( triggered() ), SLOT( slotAddFiles() ) );
     connect( m_addFolders, SIGNAL( triggered() ), SLOT( slotAddFolders() ) );
-    connect( m_uploadAction, SIGNAL( triggered() ), SLOT( slotStartNextJob() ) );
+    connect( m_uploadAction, SIGNAL( triggered() ), SLOT( on_m_uploadAction_triggered() ) );
     connect(m_quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
 }
 
@@ -270,17 +270,23 @@ void MainWindow::slotOptionsChanged()
     connect(this, SIGNAL(abort()), m_uploader, SLOT(slotAbort()));
 }
 
-void MainWindow::slotStartNextJob()
+void MainWindow::on_m_uploadAction_triggered()
 {
     if( m_uploadInProgress )
     {
         slotAbortUpload();
-        return;
-    }
+    } else
+        slotStartNextJob();
+}
+
+void MainWindow::slotStartNextJob()
+{
+    qDebug() << "MainWindow::slotStartNextJob()";
     QStringList pending_files = m_model->getPending();
     if( pending_files.size() <= 0 )
     {
         m_uploadInProgress = false;
+        qDebug() << "No more Pending files. Done.";
         return;
     }
     m_uploadInProgress = true;
@@ -357,6 +363,7 @@ void MainWindow::setUploadIcon()
 
 void MainWindow::slotAbortUpload()
 {
+    qDebug() << "MainWindow::slotAbortUpload()";
     m_uploadInProgress = false;
 
     QStringList inprogress_files = m_model->getInProgress();
