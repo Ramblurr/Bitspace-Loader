@@ -115,6 +115,7 @@ void MainWindow::createTrayIcon()
 
     m_trayIcon = new QSystemTrayIcon( this );
     m_trayIcon->setContextMenu(m_trayIconMenu);
+    m_trayIcon->setToolTip( tr( "Bitspace Loader: Waiting" ) );
     connect(m_trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(slotIconActivated(QSystemTrayIcon::ActivationReason)));
 }
 
@@ -201,6 +202,7 @@ void MainWindow::slotUploadProgress( qint64 sent, qint64 total)
     double percent = double(sent) / double(total)*100;
     qDebug() << "Percentage: " << percent;
     m_progress = percent;
+    m_trayIcon->setToolTip( tr( "Bitspace Loader: Uploading %1%" ).arg( QString::number( (int) m_progress ) ) );
 }
 
 QStringList MainWindow::nameFilters() const
@@ -324,6 +326,7 @@ void MainWindow::setUploadIcon()
     {
         m_uploadAction->setText( tr("Start Upload") );
         m_uploadAction->setIcon( QIcon::fromTheme("go-up") );
+        m_trayIcon->setToolTip( tr( "Bitspace Loader: Waiting" ) );
     }
 }
 
