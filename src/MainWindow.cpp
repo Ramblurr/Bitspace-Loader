@@ -121,10 +121,11 @@ void MainWindow::createTrayIcon()
 
 void MainWindow::addFile( const QString &file )
 {
-    m_model->insertRows( 0, 1, QModelIndex() );
-    QModelIndex index = m_model->index( 0, 0, QModelIndex() );
+    int new_row = m_model->rowCount();
+    m_model->insertRows( new_row, 1, QModelIndex() );
+    QModelIndex index = m_model->index( new_row, 0, QModelIndex() );
     m_model->setData( index, file, Qt::EditRole );
-    index = m_model->index( 0, 1, QModelIndex() );
+    index = m_model->index( new_row, 1, QModelIndex() );
     m_model->setData( index, Bitspace::Pending, Qt::EditRole );
 }
 
