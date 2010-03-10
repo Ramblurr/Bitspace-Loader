@@ -42,6 +42,7 @@ MainWindow::MainWindow( QWidget *parent ) :
         m_uploadInProgress( false )
 {
     ui->setupUi( this );
+    setWindowIcon( QIcon(":/images/icon/loader-16.png" ) );
     setupActions();
     createTrayIcon();
 
@@ -119,6 +120,7 @@ void MainWindow::createTrayIcon()
     m_trayIcon = new QSystemTrayIcon( this );
     m_trayIcon->setContextMenu( m_trayIconMenu );
     m_trayIcon->setToolTip( tr( "Bitspace Loader: Waiting" ) );
+    m_trayIcon->setIcon(QIcon(":/images/icon/loader-32.png" ));
     connect( m_trayIcon, SIGNAL( activated( QSystemTrayIcon::ActivationReason ) ), this, SLOT( slotIconActivated( QSystemTrayIcon::ActivationReason ) ) );
 }
 

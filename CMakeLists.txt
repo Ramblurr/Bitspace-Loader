@@ -11,9 +11,14 @@ set(CMAKE_CXX_FLAGS "-g -Wall")
 set(LOADER_INCLUDES
     ${QT_INCLUDES}
     ${BITSPACE_INCLUDE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/resources
     ${CMAKE_CURRENT_SOURCE_DIR}/src
     ${CMAKE_CURRENT_BINARY_DIR}/src
 )
+
+
+
 
 add_subdirectory(src)
 
