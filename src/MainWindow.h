@@ -45,6 +45,7 @@ signals:
 
 protected:
     void changeEvent(QEvent *e);
+    void closeEvent(QCloseEvent *event);
 
 public slots:
     void slotStartNextJob();

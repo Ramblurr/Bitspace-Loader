@@ -23,6 +23,7 @@
 #include "ws.h" //libbitspace
 #include "upload/Upload.h" //libbitspace
 
+#include <QCloseEvent>
 #include <QDir>
 #include <QDirIterator>
 #include <QIcon>
@@ -70,6 +71,19 @@ void MainWindow::changeEvent(QEvent *e)
         break;
     default:
         break;
+    }
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    if (m_trayIcon->isVisible()) {
+        QMessageBox::information(this, tr("Systray"),
+                                 tr("The program will keep running in the "
+                                    "system tray. To terminate the program, "
+                                    "choose <b>Quit</b> in the context menu "
+                                    "of the system tray entry."));
+        hide();
+        event->ignore();
     }
 }
 
