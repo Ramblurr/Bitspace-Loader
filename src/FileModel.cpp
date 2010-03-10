@@ -18,6 +18,7 @@
 #include <QApplication>
 #include <QIcon>
 #include <QPalette>
+
 FileModel::FileModel(QObject *parent) :
     QAbstractTableModel(parent)
 {
@@ -44,9 +45,14 @@ QVariant FileModel::data( const QModelIndex& index, int role ) const
         return QIcon::fromTheme("audio-x-generic");
     case Qt::BackgroundRole:
         if( item.second == Bitspace::Complete )
-            return Qt::green;
+            return QApplication::palette().color(QPalette::Disabled, QPalette::Base);
         else
-            return QApplication::palette().color(QPalette::Base);
+            return QApplication::palette().color(QPalette::Active, QPalette::Base);
+    case Qt::ForegroundRole:
+        if( item.second == Bitspace::Complete )
+            return QApplication::palette().color(QPalette::Disabled, QPalette::Text);
+        else
+            return QApplication::palette().color(QPalette::Active, QPalette::Text);
     case Bitspace::State:
         return item.second;
     default:
