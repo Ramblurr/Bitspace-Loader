@@ -17,6 +17,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QSystemTrayIcon>
 
 namespace Ui {
     class MainWindow;
@@ -28,6 +29,7 @@ namespace bitspace {
 
 class FileModel;
 class QNetworkReply;
+class QMenu;
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -57,8 +59,14 @@ private slots:
     void slotUploadError( QString );
     void slotOptionsChanged();
     void slotAbortUpload();
+    void slotIconActivated( QSystemTrayIcon::ActivationReason );
 private:
     void setupActions();
+
+    /**
+      * Must be called after setupActions
+      */
+    void createTrayIcon();
     void addFile( const QString & file );
     void setUploadIcon();
     QStringList nameFilters() const;
@@ -67,6 +75,9 @@ private:
     QAction* m_addFiles;
     QAction* m_addFolders;
     QAction* m_uploadAction;
+    QAction* m_quitAction;
+    QSystemTrayIcon *m_trayIcon;
+    QMenu *m_trayIconMenu;
 
     FileModel* m_model;
     bitspace::Upload* m_uploader;

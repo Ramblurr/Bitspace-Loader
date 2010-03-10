@@ -31,6 +31,8 @@
 #include <QPointer>
 #include <QSettings>
 #include <QMessageBox>
+#include <QSystemTrayIcon>
+#include <QMenu>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -39,13 +41,18 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     setupActions();
+    createTrayIcon();
+
     m_model = new FileModel( this );
     ui->tableView->setModel( m_model );
     ui->tableView->horizontalHeader()->setResizeMode( QHeaderView::ResizeToContents );
 
-   slotOptionsChanged();
-   FileDelegate* delegate = new FileDelegate( this );
-   ui->tableView->setItemDelegate( delegate );
+    slotOptionsChanged();
+    FileDelegate* delegate = new FileDelegate( this );
+    ui->tableView->setItemDelegate( delegate );
+
+    slotItemsChanged();
+    m_trayIcon->show();
 }
 
 MainWindow::~MainWindow()
@@ -71,6 +78,7 @@ void MainWindow::setupActions()
     m_addFiles = new QAction( QIcon::fromTheme("document-open"), tr("Add Files"), this );
     m_addFolders = new QAction( QIcon::fromTheme("document-open-folder"), tr("Add Folders"), this );
     m_uploadAction = new QAction( QIcon::fromTheme("go-up") , tr("Start Upload"), this );
+    m_quitAction = new QAction(tr("&Quit"), this);
 
     ui->mainToolBar->addAction( m_addFiles );
     ui->mainToolBar->addAction( m_addFolders );
@@ -80,6 +88,19 @@ void MainWindow::setupActions()
     connect( m_addFiles, SIGNAL( triggered() ), SLOT( slotAddFiles() ) );
     connect( m_addFolders, SIGNAL( triggered() ), SLOT( slotAddFolders() ) );
     connect( m_uploadAction, SIGNAL( triggered() ), SLOT( slotStartNextJob() ) );
+    connect(m_quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
+}
+
+void MainWindow::createTrayIcon()
+{
+    m_trayIconMenu = new QMenu( this );
+    m_trayIconMenu->addAction(m_uploadAction);
+    m_trayIconMenu->addSeparator();
+    m_trayIconMenu->addAction(m_quitAction);
+
+    m_trayIcon = new QSystemTrayIcon( this );
+    m_trayIcon->setContextMenu(m_trayIconMenu);
+    connect(m_trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)), this, SLOT(slotIconActivated(QSystemTrayIcon::ActivationReason)));
 }
 
 void MainWindow::addFile( const QString &file )
@@ -89,6 +110,20 @@ void MainWindow::addFile( const QString &file )
     m_model->setData( index, file, Qt::EditRole );
     index = m_model->index( 0, 1, QModelIndex() );
     m_model->setData( index, Bitspace::Pending, Qt::EditRole );
+}
+
+void MainWindow::slotIconActivated( QSystemTrayIcon::ActivationReason reason )
+{
+    switch ( reason )
+    {
+    case QSystemTrayIcon::Trigger:
+        showNormal();
+        break;
+    case QSystemTrayIcon::DoubleClick:
+    case QSystemTrayIcon::MiddleClick:
+    default:
+        break;
+    }
 }
 
 void MainWindow::slotAddFiles()
