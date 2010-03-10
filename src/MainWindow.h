@@ -60,6 +60,7 @@ private slots:
     void slotOptionsChanged();
     void slotAbortUpload();
     void slotIconActivated( QSystemTrayIcon::ActivationReason );
+    void slotItemsChanged();
 private:
     void setupActions();
 

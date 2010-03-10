@@ -44,6 +44,7 @@ MainWindow::MainWindow(QWidget *parent) :
     createTrayIcon();
 
     m_model = new FileModel( this );
+    connect(m_model, SIGNAL(dataChanged(QModelIndex,QModelIndex)), this, SLOT(slotItemsChanged()));
     ui->tableView->setModel( m_model );
     ui->tableView->horizontalHeader()->setResizeMode( QHeaderView::ResizeToContents );
 
@@ -325,4 +326,12 @@ void MainWindow::slotAbortUpload()
     }
     setUploadIcon();
     emit abort();
+}
+
+void MainWindow::slotItemsChanged()
+{
+    if( m_model->rowCount() > 0 )
+        m_uploadAction->setEnabled( true );
+    else
+        m_uploadAction->setEnabled( false );
 }
