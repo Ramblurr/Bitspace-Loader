@@ -42,7 +42,8 @@ QVariant FileModel::data( const QModelIndex& index, int role ) const
         else
             return stateToString( item.second);
     case Qt::DecorationRole:
-        return QIcon::fromTheme("audio-x-generic");
+        if( index.column() == 0 )
+            return QIcon::fromTheme("audio-x-generic");
     case Qt::BackgroundRole:
         if( item.second == Bitspace::Complete )
             return QApplication::palette().color(QPalette::Disabled, QPalette::Base);
