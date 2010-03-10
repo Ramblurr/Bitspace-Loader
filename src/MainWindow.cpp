@@ -30,10 +30,12 @@
 #include <QDebug>
 #include <QPointer>
 #include <QSettings>
+#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow),
+    m_uploadInProgress( false )
 {
     ui->setupUi(this);
     setupActions();
@@ -68,16 +70,16 @@ void MainWindow::setupActions()
 
     m_addFiles = new QAction( QIcon::fromTheme("document-open"), tr("Add Files"), this );
     m_addFolders = new QAction( QIcon::fromTheme("document-open-folder"), tr("Add Folders"), this );
-    m_upload = new QAction( QIcon::fromTheme("go-up") , tr("Start Upload"), this );
+    m_uploadAction = new QAction( QIcon::fromTheme("go-up") , tr("Start Upload"), this );
 
     ui->mainToolBar->addAction( m_addFiles );
     ui->mainToolBar->addAction( m_addFolders );
     ui->mainToolBar->addSeparator();
-    ui->mainToolBar->addAction( m_upload );
+    ui->mainToolBar->addAction( m_uploadAction );
 
     connect( m_addFiles, SIGNAL( triggered() ), SLOT( slotAddFiles() ) );
     connect( m_addFolders, SIGNAL( triggered() ), SLOT( slotAddFolders() ) );
-    connect( m_upload, SIGNAL( triggered() ), SLOT( slotStartNextJob() ) );
+    connect( m_uploadAction, SIGNAL( triggered() ), SLOT( slotStartNextJob() ) );
 }
 
 void MainWindow::addFile( const QString &file )
@@ -195,13 +197,26 @@ void MainWindow::slotOptionsChanged()
     bitspace::setNetworkAccessManager( new QNetworkAccessManager(this) );
     m_uploader = new bitspace::Upload( this );
     m_uploader->startNewSession();
+    connect(m_uploader, SIGNAL(uploadProgress(qint64,qint64)), SLOT(slotUploadProgress( qint64, qint64 )));
+    connect(m_uploader, SIGNAL(uploadFinished()), SLOT(slotUploadFinished()));
+    connect(m_uploader, SIGNAL(uploadError(QString)), SLOT(slotUploadError(QString)));
+    connect(this, SIGNAL(abort()), m_uploader, SLOT(slotAbort()));
 }
 
 void MainWindow::slotStartNextJob()
 {
+    if( m_uploadInProgress )
+    {
+        slotAbortUpload();
+        return;
+    }
     QStringList pending_files = m_model->getPending();
     if( pending_files.size() <= 0 )
+    {
+        m_uploadInProgress = false;
         return;
+    }
+    m_uploadInProgress = true;
 
     QString file = pending_files.takeFirst();
 
@@ -211,21 +226,68 @@ void MainWindow::slotStartNextJob()
     QModelIndex index = m_model->indexOf( file );
     m_model->setData( index, Bitspace::InProgress, Qt::EditRole );
 
+    setUploadIcon();
+
     bool success = m_uploader->upload( file );
     if( !success  )
         return; // TODO error handling
-
-    connect(m_uploader, SIGNAL(uploadProgress(qint64,qint64)), SLOT(slotUploadProgress( qint64, qint64 )));
-    connect(m_uploader, SIGNAL(uploadFinished()), SLOT(slotUploadFinished()));
 }
 
 void MainWindow::slotUploadFinished()
 {
     qDebug() << "MainWindow::slotUploadFinished()";
-    slotStartNextJob();
+    if( m_uploadInProgress )
+        slotStartNextJob();
+    setUploadIcon();
+}
+
+void MainWindow::slotUploadError( QString error )
+{
+    qDebug() << "slotUploadError" << error;
+    slotAbortUpload();
+
+    QMessageBox msgBox;
+    msgBox.setText( error );
+    msgBox.setIcon( QMessageBox::Critical );
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.exec();
 }
 
 double MainWindow::progress() const
 {
     return m_progress;
+}
+
+bool MainWindow::isOperationRunning() const
+{
+    return m_uploadInProgress;
+}
+
+void MainWindow::setUploadIcon()
+{
+    if( m_uploadInProgress )
+    {
+        m_uploadAction->setText( tr("Stop Upload") );
+        m_uploadAction->setIcon( QIcon::fromTheme("process-stop") );
+    }
+    else
+    {
+        m_uploadAction->setText( tr("Start Upload") );
+        m_uploadAction->setIcon( QIcon::fromTheme("go-up") );
+    }
+}
+
+void MainWindow::slotAbortUpload()
+{
+    m_uploadInProgress = false;
+
+    QStringList inprogress_files = m_model->getInProgress();
+    foreach(QString file, inprogress_files)
+    {
+        // change the status for the item
+        QModelIndex index = m_model->indexOf( file );
+        m_model->setData( index, Bitspace::Pending, Qt::EditRole );
+    }
+    setUploadIcon();
+    emit abort();
 }

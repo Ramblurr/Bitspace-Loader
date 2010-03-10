@@ -23,7 +23,8 @@
 
 void FileDelegate::paint( QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
 {
-    if (index.column() != 1 || (Bitspace::ItemStates) index.data(Bitspace::State).toInt() != Bitspace::InProgress )
+    MainWindow* mw = qobject_cast<MainWindow *>(parent());
+    if (index.column() != 1 || (Bitspace::ItemStates) index.data(Bitspace::State).toInt() != Bitspace::InProgress || !mw->isOperationRunning() )
     {
         QStyledItemDelegate::paint(painter, option, index);
         return;

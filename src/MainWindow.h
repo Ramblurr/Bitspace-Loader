@@ -36,6 +36,10 @@ public:
     ~MainWindow();
 
     double progress() const;
+    bool isOperationRunning() const;
+
+signals:
+    void abort();
 
 protected:
     void changeEvent(QEvent *e);
@@ -50,21 +54,25 @@ private slots:
     void slotAddFolders();
     void slotUploadProgress( qint64, qint64 );
     void slotUploadFinished();
+    void slotUploadError( QString );
     void slotOptionsChanged();
+    void slotAbortUpload();
 private:
     void setupActions();
     void addFile( const QString & file );
+    void setUploadIcon();
     QStringList nameFilters() const;
     Ui::MainWindow *ui;
 
     QAction* m_addFiles;
     QAction* m_addFolders;
-    QAction* m_upload;
+    QAction* m_uploadAction;
 
     FileModel* m_model;
     bitspace::Upload* m_uploader;
 
     double m_progress;
+    bool m_uploadInProgress;
 };
 
 #endif // MAINWINDOW_H

@@ -163,6 +163,16 @@ QStringList FileModel::getPending() const
     return files;
 }
 
+QStringList FileModel::getInProgress() const
+{
+    QStringList files;
+    foreach( FileItem item, m_list )
+    {
+        if( item.second == Bitspace::InProgress )
+            files << item.first;
+    }
+    return files;
+}
 QString FileModel::stateToString(  const Bitspace::ItemStates & state ) const
 {
     switch( state )

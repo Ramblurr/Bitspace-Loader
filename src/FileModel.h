@@ -58,6 +58,7 @@ public:
     QModelIndex indexOf( const QString &file, int column = 1 ) const;
     QStringList getAll() const;
     QStringList getPending() const;
+    QStringList getInProgress() const;
 
 signals:
 
