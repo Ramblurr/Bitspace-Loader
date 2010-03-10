@@ -304,6 +304,15 @@ void MainWindow::slotStartNextJob()
 void MainWindow::slotUploadFinished()
 {
     qDebug() << "MainWindow::slotUploadFinished()";
+
+    QStringList inprogress_files = m_model->getInProgress();
+    foreach(QString file, inprogress_files)
+    {
+        // change the status for the item
+        QModelIndex index = m_model->indexOf( file );
+        m_model->setData( index, Bitspace::Complete, Qt::EditRole );
+    }
+
     if( m_uploadInProgress )
         slotStartNextJob();
     setUploadIcon();
