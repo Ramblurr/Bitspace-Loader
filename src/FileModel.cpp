@@ -20,7 +20,9 @@
 #include <QPalette>
 
 FileModel::FileModel(QObject *parent) :
-    QAbstractTableModel(parent)
+    QAbstractTableModel(parent),
+    m_currentActual( 0 ),
+    m_currentTotal( 0 )
 {
 }
 
@@ -54,6 +56,13 @@ QVariant FileModel::data( const QModelIndex& index, int role ) const
             return QApplication::palette().color(QPalette::Disabled, QPalette::Text);
         else
             return QApplication::palette().color(QPalette::Active, QPalette::Text);
+    case Qt::ToolTipRole:
+        if( item.second == Bitspace::InProgress )
+        {
+            QString tp = tr( "%1 / %2 KB" ).arg( QString::number(m_currentActual / 1024), QString::number( m_currentTotal / 1024) );
+            return tp;
+        } else
+            return tr("Pending");
     case Bitspace::State:
         return item.second;
     default:
@@ -193,4 +202,10 @@ QString FileModel::stateToString(  const Bitspace::ItemStates & state ) const
     default:
         return QString();
     }
+}
+
+void FileModel::slotUploadProgress( qint64 current, qint64 total)
+{
+    m_currentActual = current;
+    m_currentTotal = total;
 }

@@ -63,10 +63,14 @@ public:
 signals:
 
 public slots:
+    void slotUploadProgress( qint64, qint64 );
 
 private:
     QString stateToString( const Bitspace::ItemStates & state ) const;
     QList<FileItem> m_list;
+
+    qint64 m_currentActual;
+    qint64 m_currentTotal;
 
 };
 

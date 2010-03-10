@@ -250,6 +250,7 @@ void MainWindow::slotOptionsChanged()
     m_uploader = new bitspace::Upload( this );
     m_uploader->startNewSession();
     connect(m_uploader, SIGNAL(uploadProgress(qint64,qint64)), SLOT(slotUploadProgress( qint64, qint64 )));
+    connect(m_uploader, SIGNAL(uploadProgress(qint64,qint64)), m_model, SLOT(slotUploadProgress( qint64, qint64 )));
     connect(m_uploader, SIGNAL(uploadFinished()), SLOT(slotUploadFinished()));
     connect(m_uploader, SIGNAL(uploadError(QString)), SLOT(slotUploadError(QString)));
     connect(this, SIGNAL(abort()), m_uploader, SLOT(slotAbort()));
@@ -269,6 +270,7 @@ void MainWindow::slotStartNextJob()
         return;
     }
     m_uploadInProgress = true;
+    m_progress = 0;
 
     QString file = pending_files.takeFirst();
 
