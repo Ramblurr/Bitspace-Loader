@@ -19,10 +19,10 @@
 #include <QIcon>
 #include <QPalette>
 
-FileModel::FileModel(QObject *parent) :
-    QAbstractTableModel(parent),
-    m_currentActual( 0 ),
-    m_currentTotal( 0 )
+FileModel::FileModel( QObject *parent ) :
+        QAbstractTableModel( parent ),
+        m_currentActual( 0 ),
+        m_currentTotal( 0 )
 {
 }
 
@@ -31,7 +31,7 @@ QVariant FileModel::data( const QModelIndex& index, int role ) const
     if ( !index.isValid() )
         return QVariant();
 
-    if( index.row() >= m_list.size() || index.row() < 0 )
+    if ( index.row() >= m_list.size() || index.row() < 0 )
         return QVariant();
 
 
@@ -39,30 +39,31 @@ QVariant FileModel::data( const QModelIndex& index, int role ) const
     switch ( role )
     {
     case Qt::DisplayRole:
-        if( index.column() == 0 )
+        if ( index.column() == 0 )
             return item.first;
         else
-            return stateToString( item.second);
+            return stateToString( item.second );
     case Qt::DecorationRole:
-        if( index.column() == 0 )
-            return QIcon::fromTheme("audio-x-generic");
+        if ( index.column() == 0 )
+            return QIcon::fromTheme( "audio-x-generic" );
     case Qt::BackgroundRole:
-        if( item.second == Bitspace::Complete )
-            return QApplication::palette().color(QPalette::Disabled, QPalette::Base);
+        if ( item.second == Bitspace::Complete )
+            return QApplication::palette().color( QPalette::Disabled, QPalette::Base );
         else
-            return QApplication::palette().color(QPalette::Active, QPalette::Base);
+            return QApplication::palette().color( QPalette::Active, QPalette::Base );
     case Qt::ForegroundRole:
-        if( item.second == Bitspace::Complete )
-            return QApplication::palette().color(QPalette::Disabled, QPalette::Text);
+        if ( item.second == Bitspace::Complete )
+            return QApplication::palette().color( QPalette::Disabled, QPalette::Text );
         else
-            return QApplication::palette().color(QPalette::Active, QPalette::Text);
+            return QApplication::palette().color( QPalette::Active, QPalette::Text );
     case Qt::ToolTipRole:
-        if( item.second == Bitspace::InProgress )
+        if ( item.second == Bitspace::InProgress )
         {
-            QString tp = tr( "%1 / %2 KB" ).arg( QString::number(m_currentActual / 1024), QString::number( m_currentTotal / 1024) );
+            QString tp = tr( "%1 / %2 KB" ).arg( QString::number( m_currentActual / 1024 ), QString::number( m_currentTotal / 1024 ) );
             return tp;
-        } else
-            return tr("Pending");
+        }
+        else
+            return tr( "Pending" );
     case Bitspace::State:
         return item.second;
     default:
@@ -82,20 +83,22 @@ int FileModel::columnCount( const QModelIndex &parent ) const
     return 2;
 }
 
-QVariant FileModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant FileModel::headerData( int section, Qt::Orientation orientation, int role ) const
 {
-    if (role != Qt::DisplayRole)
+    if ( role != Qt::DisplayRole )
         return QVariant();
-    if (orientation == Qt::Horizontal) {
-        switch (section) {
-            case 0:
-                return tr("Filename");
+    if ( orientation == Qt::Horizontal )
+    {
+        switch ( section )
+        {
+        case 0:
+            return tr( "Filename" );
 
-            case 1:
-                return tr("Status");
+        case 1:
+            return tr( "Status" );
 
-            default:
-                return QVariant();
+        default:
+            return QVariant();
         }
     }
     return QVariant();
@@ -103,7 +106,7 @@ QVariant FileModel::headerData(int section, Qt::Orientation orientation, int rol
 
 bool FileModel::setData( const QModelIndex &index, const QVariant &value, int role )
 {
-    if ( index.isValid() && role == Qt::EditRole)
+    if ( index.isValid() && role == Qt::EditRole )
     {
         int row = index.row();
         FileItem p = m_list.value( row );
@@ -111,9 +114,9 @@ bool FileModel::setData( const QModelIndex &index, const QVariant &value, int ro
         if ( index.column() == 0 )
             p.first = value.toString();
         else if ( index.column() == 1 )
-            p.second = (Bitspace::ItemStates) value.toInt();
+            p.second = ( Bitspace::ItemStates ) value.toInt();
 
-        m_list.replace(row, p);
+        m_list.replace( row, p );
         emit( dataChanged( index, index ) );
 
         return true;
@@ -123,12 +126,13 @@ bool FileModel::setData( const QModelIndex &index, const QVariant &value, int ro
 
 bool FileModel::insertRows( int position, int rows, const QModelIndex &index )
 {
-    Q_UNUSED(index);
-    beginInsertRows(QModelIndex(), position, position+rows-1);
+    Q_UNUSED( index );
+    beginInsertRows( QModelIndex(), position, position + rows - 1 );
 
-    for (int row=0; row < rows; row++) {
+    for ( int row = 0; row < rows; row++ )
+    {
         FileItem pair( "", Bitspace::Undefined );
-        m_list.insert(position, pair);
+        m_list.insert( position, pair );
     }
 
     endInsertRows();
@@ -138,10 +142,11 @@ bool FileModel::insertRows( int position, int rows, const QModelIndex &index )
 bool FileModel::removeRows( int position, int rows, const QModelIndex &index )
 {
     Q_UNUSED( index );
-    beginRemoveRows(QModelIndex(), position, position+rows-1);
+    beginRemoveRows( QModelIndex(), position, position + rows - 1 );
 
-    for (int row=0; row < rows; ++row) {
-        m_list.removeAt(position);
+    for ( int row = 0; row < rows; ++row )
+    {
+        m_list.removeAt( position );
     }
 
     endRemoveRows();
@@ -150,9 +155,9 @@ bool FileModel::removeRows( int position, int rows, const QModelIndex &index )
 
 QModelIndex FileModel::indexOf( const QString &file, int column ) const
 {
-    for(int i = 0; i < m_list.size(); i++ )
+    for ( int i = 0; i < m_list.size(); i++ )
     {
-        if( m_list.at(i).first == file )
+        if ( m_list.at( i ).first == file )
             return index( i , column, QModelIndex() );
     }
     return QModelIndex();
@@ -173,7 +178,7 @@ QStringList FileModel::getPending() const
     QStringList files;
     foreach( FileItem item, m_list )
     {
-        if( item.second == Bitspace::Pending )
+        if ( item.second == Bitspace::Pending )
             files << item.first;
     }
     return files;
@@ -184,27 +189,27 @@ QStringList FileModel::getInProgress() const
     QStringList files;
     foreach( FileItem item, m_list )
     {
-        if( item.second == Bitspace::InProgress )
+        if ( item.second == Bitspace::InProgress )
             files << item.first;
     }
     return files;
 }
-QString FileModel::stateToString(  const Bitspace::ItemStates & state ) const
+QString FileModel::stateToString( const Bitspace::ItemStates & state ) const
 {
-    switch( state )
+    switch ( state )
     {
     case Bitspace::Pending:
-        return tr("Pending");
+        return tr( "Pending" );
     case Bitspace::InProgress:
-        return tr("In Progress");
+        return tr( "In Progress" );
     case Bitspace::Complete:
-        return tr("Complete");
+        return tr( "Complete" );
     default:
         return QString();
     }
 }
 
-void FileModel::slotUploadProgress( qint64 current, qint64 total)
+void FileModel::slotUploadProgress( qint64 current, qint64 total )
 {
     m_currentActual = current;
     m_currentTotal = total;

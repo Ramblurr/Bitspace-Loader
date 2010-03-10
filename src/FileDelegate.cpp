@@ -23,10 +23,10 @@
 
 void FileDelegate::paint( QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
 {
-    MainWindow* mw = qobject_cast<MainWindow *>(parent());
-    if (index.column() != 1 || (Bitspace::ItemStates) index.data(Bitspace::State).toInt() != Bitspace::InProgress || !mw->isOperationRunning() )
+    MainWindow* mw = qobject_cast<MainWindow *>( parent() );
+    if ( index.column() != 1 || ( Bitspace::ItemStates ) index.data( Bitspace::State ).toInt() != Bitspace::InProgress || !mw->isOperationRunning() )
     {
-        QStyledItemDelegate::paint(painter, option, index);
+        QStyledItemDelegate::paint( painter, option, index );
         return;
     }
 
@@ -40,15 +40,15 @@ void FileDelegate::paint( QPainter* painter, const QStyleOptionViewItem& option,
     progressBarOption.textAlignment = Qt::AlignCenter;
     progressBarOption.textVisible = true;
 
-    double progress = qobject_cast<MainWindow *>(parent())->progress();
+    double progress = qobject_cast<MainWindow *>( parent() )->progress();
     progressBarOption.progress = progress < 0 ? 0 : progress;
-    progressBarOption.text = QString().sprintf("%d%%", progressBarOption.progress);
+    progressBarOption.text = QString().sprintf( "%d%%", progressBarOption.progress );
 
-   // Draw the progress bar onto the view.
-   QApplication::style()->drawControl(QStyle::CE_ProgressBar, &progressBarOption, painter);
+    // Draw the progress bar onto the view.
+    QApplication::style()->drawControl( QStyle::CE_ProgressBar, &progressBarOption, painter );
 }
 
 QSize FileDelegate::sizeHint( const QStyleOptionViewItem& option, const QModelIndex& index ) const
 {
-    return QStyledItemDelegate::sizeHint(option, index);
+    return QStyledItemDelegate::sizeHint( option, index );
 }

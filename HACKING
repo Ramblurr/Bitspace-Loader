@@ -1,0 +1,2 @@
+Recommended Coding Style:
+astyle -s4 -b -p -U -D -o 

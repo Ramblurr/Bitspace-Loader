@@ -19,22 +19,25 @@
 #include <QMainWindow>
 #include <QSystemTrayIcon>
 
-namespace Ui {
-    class MainWindow;
+namespace Ui
+{
+class MainWindow;
 }
 
-namespace bitspace {
-    class Upload;
+namespace bitspace
+{
+class Upload;
 }
 
 class FileModel;
 class QNetworkReply;
 class QMenu;
 
-class MainWindow : public QMainWindow {
+class MainWindow : public QMainWindow
+{
     Q_OBJECT
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow( QWidget *parent = 0 );
     ~MainWindow();
 
     double progress() const;
@@ -44,8 +47,8 @@ signals:
     void abort();
 
 protected:
-    void changeEvent(QEvent *e);
-    void closeEvent(QCloseEvent *event);
+    void changeEvent( QEvent *e );
+    void closeEvent( QCloseEvent *event );
 
 public slots:
     void slotStartNextJob();
