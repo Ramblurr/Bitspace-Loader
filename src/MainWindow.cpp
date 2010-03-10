@@ -23,6 +23,7 @@
 #include "ws.h" //libbitspace
 #include "upload/Upload.h" //libbitspace
 
+#include <QtAlgorithms>
 #include <QCloseEvent>
 #include <QDir>
 #include <QDirIterator>
@@ -157,6 +158,8 @@ void MainWindow::slotAddFiles()
     if( filenames.size() <= 0 )
         return;
 
+    //sort ascending
+    qSort( filenames );
     QStringList current_files = m_model->getAll();
     foreach( QString file, filenames )
     {
@@ -186,11 +189,21 @@ void MainWindow::slotAddFolders()
         return;
 
     QDirIterator it( folder_name, nameFilters(), QDir::Files, QDirIterator::Subdirectories);
-    QStringList current_files = m_model->getAll();
+    QStringList filenames;
+    //create list of files
     while( it.hasNext() )
     {
         it.next();
         QString file = it.filePath();
+        filenames << file;
+    }
+    //sort files
+    qSort( filenames );
+
+    // ad them to the model
+    QStringList current_files = m_model->getAll();
+    foreach( QString file, filenames )
+    {
         if( current_files.contains( file ) )
             continue;
         addFile( file );
