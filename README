@@ -15,7 +15,7 @@ Dependencies
 ============
     CMake >= 2.6
     Qt >= 4.6
-    libbitspace development version (http://github.com/Ramblurr/libbitspace)
+    libbitspace development version ( http://github.com/Ramblurr/libbitspace )
 
 To Build
 ========
