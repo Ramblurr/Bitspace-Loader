@@ -182,4 +182,7 @@ void TransferItem::slotAbortJob()
     if( m_reply )
         m_reply->slotAbort();
     m_state = Bitspace::Pending;
+    m_uploadedSize = 0;
+    m_runningSeconds = 0;
+    m_errored = false;
 }
