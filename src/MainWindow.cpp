@@ -19,9 +19,9 @@
 #include "ConfigDialog.h"
 #include "FileModel.h"
 #include "FileDelegate.h"
+#include "loader_global.h"
 
 #include "ws.h" //libbitspace
-#include "upload/Upload.h" //libbitspace
 
 #include <QtAlgorithms>
 #include <QCloseEvent>
@@ -38,8 +38,7 @@
 
 MainWindow::MainWindow( QWidget *parent ) :
         QMainWindow( parent ),
-        ui( new Ui::MainWindow ),
-        m_uploadInProgress( false )
+        ui( new Ui::MainWindow )
 {
     ui->setupUi( this );
     setWindowIcon( QIcon(":/images/icon/loader-16.png" ) );
@@ -48,6 +47,7 @@ MainWindow::MainWindow( QWidget *parent ) :
 
     m_model = new FileModel( this );
     connect( m_model, SIGNAL( dataChanged( QModelIndex, QModelIndex ) ), this, SLOT( slotItemsChanged() ) );
+    connect( this, SIGNAL(abort()), m_model, SLOT(slotAbort()));
     ui->tableView->setModel( m_model );
     ui->tableView->horizontalHeader()->setResizeMode( QHeaderView::ResizeToContents );
 
@@ -126,12 +126,14 @@ void MainWindow::createTrayIcon()
 
 void MainWindow::addFile( const QString &file )
 {
+    if( m_model->contains( file ) )
+        return;
     int new_row = m_model->rowCount();
     m_model->insertRows( new_row, 1, QModelIndex() );
     QModelIndex index = m_model->index( new_row, 0, QModelIndex() );
     m_model->setData( index, file, Qt::EditRole );
-    index = m_model->index( new_row, 1, QModelIndex() );
-    m_model->setData( index, Bitspace::Pending, Qt::EditRole );
+//    index = m_model->index( new_row, 1, QModelIndex() );
+//    m_model->setData( index, Bitspace::Pending, Qt::EditRole );
 }
 
 void MainWindow::slotIconActivated( QSystemTrayIcon::ActivationReason reason )
@@ -164,11 +166,8 @@ void MainWindow::slotAddFiles()
 
     //sort ascending
     qSort( filenames );
-    QStringList current_files = m_model->getAll();
     foreach( QString file, filenames )
     {
-        if ( current_files.contains( file ) )
-            continue;
         addFile( file );
     }
 }
@@ -204,23 +203,17 @@ void MainWindow::slotAddFolders()
     //sort files
     qSort( filenames );
 
-    // ad them to the model
-    QStringList current_files = m_model->getAll();
+    // add them to the model
     foreach( QString file, filenames )
     {
-        if ( current_files.contains( file ) )
-            continue;
         addFile( file );
     }
 }
 
 void MainWindow::slotUploadProgress( qint64 sent, qint64 total )
-{
-    qDebug() << "Sent: " << sent << "Total:" << total;
+{//    qDebug() << "Sent: " << sent << "Total:" << total;
     double percent = double( sent ) / double( total ) * 100;
-    qDebug() << "Percentage: " << percent;
-    m_progress = percent;
-    m_trayIcon->setToolTip( tr( "Bitspace Loader: Uploading %1%" ).arg( QString::number(( int ) m_progress ) ) );
+    m_trayIcon->setToolTip( tr( "Bitspace Loader: Uploading %1%" ).arg( QString::number(( int ) percent ) ) );
 }
 
 QStringList MainWindow::nameFilters() const
@@ -265,69 +258,63 @@ void MainWindow::slotOptionsChanged()
     qDebug() << "token: " << apitoken;
     bitspace::ws::ApiToken = apitoken;
     bitspace::setNetworkAccessManager( new QNetworkAccessManager( this ) );
-    m_uploader = new bitspace::Upload( this );
-    m_uploader->startNewSession();
-    connect( m_uploader, SIGNAL( uploadProgress( qint64, qint64 ) ), SLOT( slotUploadProgress( qint64, qint64 ) ) );
-    connect( m_uploader, SIGNAL( uploadProgress( qint64, qint64 ) ), m_model, SLOT( slotUploadProgress( qint64, qint64 ) ) );
-    connect( m_uploader, SIGNAL( uploadFinished() ), SLOT( slotUploadFinished() ) );
-    connect( m_uploader, SIGNAL( uploadError( QString ) ), SLOT( slotUploadError( QString ) ) );
-    connect( this, SIGNAL( abort() ), m_uploader, SLOT( slotAbort() ) );
+    Bitspace::Uploader = new bitspace::UploadManager( this );
+    Bitspace::Uploader->startNewSession();
 }
 
 void MainWindow::on_m_uploadAction_triggered()
 {
-    if ( m_uploadInProgress )
+    if ( m_model->isTransferring() )
     {
-        slotAbortUpload();
+        emit abort();
     }
     else
-        slotStartNextJob();
+        m_model->slotStart();
+    setUploadIcon();
 }
 
 void MainWindow::slotStartNextJob()
 {
-    qDebug() << "MainWindow::slotStartNextJob()";
-    QStringList pending_files = m_model->getPending();
-    if ( pending_files.size() <= 0 )
-    {
-        m_uploadInProgress = false;
-        qDebug() << "No more Pending files. Done.";
-        return;
-    }
-    m_uploadInProgress = true;
-    m_progress = 0;
-
-    QString file = pending_files.takeFirst();
-
-    qDebug() << "Starting next job: " << file;
-
-    // change the status for the item
-    QModelIndex index = m_model->indexOf( file );
-    m_model->setData( index, Bitspace::InProgress, Qt::EditRole );
-
-    setUploadIcon();
-
-    bool success = m_uploader->upload( file );
-    if ( !success )
-        return; // TODO error handling
+//    qDebug() << "MainWindow::slotStartNextJob()";
+//    QStringList pending_files = m_model->getPending();
+//    if ( pending_files.size() <= 0 )
+//    {
+//        m_uploadInProgress = false;
+//        qDebug() << "No more Pending files. Done.";
+//        return;
+//    }
+//    m_uploadInProgress = true;
+//
+//    QString file = pending_files.takeFirst();
+//    qDebug() << "Starting next job: " << file;
+//
+//    // change the status for the item
+//    QModelIndex index = m_model->indexOf( file );
+//    m_model->setData( index, Bitspace::InProgress, Qt::EditRole );
+//
+//    setUploadIcon();
+//
+//    bool success = m_uploader->upload( file );
+//    if ( !success )
+//        return; // TODO error handling
 }
 
-void MainWindow::slotUploadFinished()
-{
-    qDebug() << "MainWindow::slotUploadFinished()";
-
-    QStringList inprogress_files = m_model->getInProgress();
-    foreach( QString file, inprogress_files )
-    {
-        // change the status for the item
-        QModelIndex index = m_model->indexOf( file );
-        m_model->setData( index, Bitspace::Complete, Qt::EditRole );
-    }
-
-    if ( m_uploadInProgress )
-        slotStartNextJob();
-    setUploadIcon();
-}
+//void MainWindow::slotUploadFinished()
+//{
+//    qDebug() << "MainWindow::slotUploadFinished()";
+//
+//    QStringList inprogress_files = m_model->getInProgress();
+//    foreach( QString file, inprogress_files )
+//    {
+//        // change the status for the item
+//        QModelIndex index = m_model->indexOf( file );
+//        m_model->setData( index, Bitspace::Complete, Qt::EditRole );
+//    }
+//
+//    if ( m_uploadInProgress )
+//        slotStartNextJob();
+//    setUploadIcon();
+//}
 
 void MainWindow::slotUploadError( QString error )
 {
@@ -341,19 +328,9 @@ void MainWindow::slotUploadError( QString error )
     msgBox.exec();
 }
 
-double MainWindow::progress() const
-{
-    return m_progress;
-}
-
-bool MainWindow::isOperationRunning() const
-{
-    return m_uploadInProgress;
-}
-
 void MainWindow::setUploadIcon()
 {
-    if ( m_uploadInProgress )
+    if ( m_model->isTransferring() )
     {
         m_uploadAction->setText( tr( "Stop Upload" ) );
         m_uploadAction->setIcon( QIcon::fromTheme( "process-stop" ) );
@@ -368,16 +345,16 @@ void MainWindow::setUploadIcon()
 
 void MainWindow::slotAbortUpload()
 {
-    qDebug() << "MainWindow::slotAbortUpload()";
-    m_uploadInProgress = false;
-
-    QStringList inprogress_files = m_model->getInProgress();
-    foreach( QString file, inprogress_files )
-    {
-        // change the status for the item
-        QModelIndex index = m_model->indexOf( file );
-        m_model->setData( index, Bitspace::Pending, Qt::EditRole );
-    }
+//    qDebug() << "MainWindow::slotAbortUpload()";
+//    m_uploadInProgress = false;
+//
+//    QStringList inprogress_files = m_model->getInProgress();
+//    foreach( QString file, inprogress_files )
+//    {
+//        // change the status for the item
+//        QModelIndex index = m_model->indexOf( file );
+//        m_model->setData( index, Bitspace::Pending, Qt::EditRole );
+//    }
     setUploadIcon();
     emit abort();
 }

@@ -18,17 +18,14 @@
 
 #include <QMainWindow>
 #include <QSystemTrayIcon>
+#include <QTime>
 
 namespace Ui
 {
 class MainWindow;
 }
 
-namespace bitspace
-{
-class Upload;
-}
-
+class TransferItem;
 class FileModel;
 class QNetworkReply;
 class QMenu;
@@ -39,9 +36,6 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow( QWidget *parent = 0 );
     ~MainWindow();
-
-    double progress() const;
-    bool isOperationRunning() const;
 
 signals:
     void abort();
@@ -59,9 +53,8 @@ private slots:
     void on_m_uploadAction_triggered();
     void slotAddFiles();
     void slotAddFolders();
-    void slotUploadProgress( qint64, qint64 );
-    void slotUploadFinished();
     void slotUploadError( QString );
+    void slotUploadProgress( qint64 , qint64 );
     void slotOptionsChanged();
     void slotAbortUpload();
     void slotIconActivated( QSystemTrayIcon::ActivationReason );
@@ -76,6 +69,7 @@ private:
     void addFile( const QString & file );
     void setUploadIcon();
     QStringList nameFilters() const;
+
     Ui::MainWindow *ui;
 
     QAction* m_addFiles;
@@ -86,10 +80,6 @@ private:
     QMenu *m_trayIconMenu;
 
     FileModel* m_model;
-    bitspace::Upload* m_uploader;
-
-    double m_progress;
-    bool m_uploadInProgress;
 };
 
 #endif // MAINWINDOW_H

@@ -15,16 +15,15 @@
  ****************************************************************************************/
 #include "FileDelegate.h"
 
-#include "FileModel.h"
-#include "MainWindow.h"
+#include "loader_global.h"
 
 #include <QStyleOptionProgressBar>
 #include <QApplication>
+#include <QDebug>
 
 void FileDelegate::paint( QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const
 {
-    MainWindow* mw = qobject_cast<MainWindow *>( parent() );
-    if ( index.column() != 1 || ( Bitspace::ItemStates ) index.data( Bitspace::State ).toInt() != Bitspace::InProgress || !mw->isOperationRunning() )
+    if ( index.column() != 1 || ( Bitspace::ItemStates ) index.data( Bitspace::State ).toInt() != Bitspace::InProgress )
     {
         QStyledItemDelegate::paint( painter, option, index );
         return;
@@ -40,7 +39,7 @@ void FileDelegate::paint( QPainter* painter, const QStyleOptionViewItem& option,
     progressBarOption.textAlignment = Qt::AlignCenter;
     progressBarOption.textVisible = true;
 
-    double progress = qobject_cast<MainWindow *>( parent() )->progress();
+    double progress = index.data( Bitspace::Progress ).toDouble();
     progressBarOption.progress = progress < 0 ? 0 : progress;
     progressBarOption.text = QString().sprintf( "%d%%", progressBarOption.progress );
 

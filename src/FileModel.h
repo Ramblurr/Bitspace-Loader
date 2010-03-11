@@ -16,33 +16,19 @@
 #ifndef FILEMODEL_H
 #define FILEMODEL_H
 
+#include "loader_global.h"
+#include "TransferItem.h"
+
 #include <QAbstractTableModel>
 #include <QList>
 #include <QPair>
 
-namespace Bitspace
-{
-enum ItemRoles
-{
-    State = Qt::UserRole
-};
-
-enum ItemStates
-{
-    Pending = 0,
-    InProgress,
-    Complete,
-
-    Undefined
-};
-}
-
-typedef QPair<QString, Bitspace::ItemStates> FileItem;
 class FileModel : public QAbstractTableModel
 {
     Q_OBJECT
 public:
     explicit FileModel( QObject *parent = 0 );
+
     virtual QVariant data( const QModelIndex& index, int role = Qt::DisplayRole ) const;
     virtual int rowCount( const QModelIndex& parent = QModelIndex() ) const;
     virtual int columnCount( const QModelIndex &parent = QModelIndex() ) const;
@@ -55,22 +41,32 @@ public:
       * returns a QModelIndex for the file name. the column defaults to 1, which
       * will be the index for the ItemState
       */
-    QModelIndex indexOf( const QString &file, int column = 1 ) const;
-    QStringList getAll() const;
-    QStringList getPending() const;
-    QStringList getInProgress() const;
+    QModelIndex indexOf( const TransferItem* const item, int column = 1 ) const;
+    TransferItemList getAll() const;
+    TransferItemList getPending() const;
+    TransferItemList getInProgress() const;
+
+    bool isTransferring() const;
+    bool contains( const QString &file ) const;
 
 signals:
 
 public slots:
+    void slotStart();
+    void slotAbort();
+
     void slotUploadProgress( qint64, qint64 );
+private slots:
+    void slotStartNextJob();
+    void slotJobFinished( TransferItem* );
 
 private:
     QString stateToString( const Bitspace::ItemStates & state ) const;
-    QList<FileItem> m_list;
+    TransferItemList m_list;
 
     qint64 m_currentActual;
     qint64 m_currentTotal;
+    bool m_uploadInProgress;
 
 };
 

@@ -3,13 +3,16 @@ include_directories(
     ${LOADER_INCLUDES}
 )
 set(loader_SRCS
+    TransferItem.cpp
     ConfigDialog.cpp
     FileModel.cpp
     FileDelegate.cpp
     MainWindow.cpp
     main.cpp
+    loader_global.cpp
 )
 set(loader_MOC_SRCS
+    TransferItem.h
     ConfigDialog.h
     MainWindow.h
     FileModel.h
