@@ -108,7 +108,7 @@ int TransferItem::elapsedTime() const
 
 int TransferItem::currentSpeed() const
 {
-    if ( m_state == Bitspace::InProgress )
+    if ( m_state == Bitspace::InProgress && elapsedTime() )
         return m_uploadedSize / elapsedTime();
     return 0;
 }
