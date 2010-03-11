@@ -44,7 +44,7 @@ QVariant FileModel::data( const QModelIndex& index, int role ) const
     case Qt::DisplayRole:
         if ( index.column() == 0 )
             return item->filePath();
-        else
+        else if ( index.column() == 1 )
             return stateToString( item->status() );
     case Qt::DecorationRole:
         if ( index.column() == 0 )
@@ -67,10 +67,20 @@ QVariant FileModel::data( const QModelIndex& index, int role ) const
         }
         else
             return tr( "Pending" );
-    case Bitspace::State:
+    case Bitspace::StateRole:
         return item->status();
-    case Bitspace::Progress:
+    case Bitspace::ProgressRole:
         return item->percentProgressed();
+    case Bitspace::ElapsedTimeRole:
+        return item->elapsedTime();
+    case Bitspace::TotalBytesRole:
+        return item->bytesTotal();
+    case Bitspace::ProcessedBytesRole:
+        return item->bytesProcessed();
+    case Bitspace::RemainingTimeRole:
+        return item->remainingTime();
+    case Bitspace::SpeedRole:
+        return item->currentSpeed();
     default:
         return QVariant();
     }
@@ -85,7 +95,7 @@ int FileModel::rowCount( const QModelIndex& parent ) const
 int FileModel::columnCount( const QModelIndex &parent ) const
 {
     Q_UNUSED( parent )
-    return 2;
+    return 3;
 }
 
 QVariant FileModel::headerData( int section, Qt::Orientation orientation, int role ) const
@@ -97,11 +107,11 @@ QVariant FileModel::headerData( int section, Qt::Orientation orientation, int ro
         switch ( section )
         {
         case 0:
-            return tr( "Filename" );
-
+            return tr( "Name" );
         case 1:
-            return tr( "Status" );
-
+            return tr( "Transfer" );
+        case 2:
+            return tr( "Progress" );
         default:
             return QVariant();
         }

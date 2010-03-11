@@ -24,8 +24,13 @@ namespace Bitspace
 {
 enum ItemRoles
 {
-    State = Qt::UserRole,
-    Progress
+    StateRole = Qt::UserRole,
+    ProgressRole,
+    TotalBytesRole,
+    ProcessedBytesRole,
+    ElapsedTimeRole,
+    RemainingTimeRole,
+    SpeedRole
 };
 
 enum ItemStates

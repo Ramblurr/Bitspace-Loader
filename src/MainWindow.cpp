@@ -52,6 +52,7 @@ MainWindow::MainWindow( QWidget *parent ) :
     connect( this, SIGNAL(abort()), this, SLOT(slotAbortUpload()));
     ui->tableView->setModel( m_model );
     ui->tableView->horizontalHeader()->setResizeMode( QHeaderView::ResizeToContents );
+    ui->tableView->setShowGrid( false );
 
     slotOptionsChanged();
     FileDelegate* delegate = new FileDelegate( this );

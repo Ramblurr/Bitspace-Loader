@@ -25,6 +25,12 @@ public:
     virtual void paint( QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index ) const;
     virtual QSize sizeHint( const QStyleOptionViewItem& option, const QModelIndex& index ) const;
 
+private:
+    QString bytesTotal( const QModelIndex &index ) const;
+    QString bytesRunning( const QModelIndex &index ) const;
+    QString speed( const QModelIndex &index ) const;
+
+
 };
 
 #endif // FILEDELEGATE_H
