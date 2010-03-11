@@ -35,6 +35,7 @@
 #include <QMessageBox>
 #include <QSystemTrayIcon>
 #include <QMenu>
+#include <QDesktopServices>
 
 MainWindow::MainWindow( QWidget *parent ) :
         QMainWindow( parent ),
@@ -153,7 +154,9 @@ void MainWindow::slotIconActivated( QSystemTrayIcon::ActivationReason reason )
 
 void MainWindow::slotAddFiles()
 {
-    QFileDialog dialog( this );
+    QSettings settings;
+    QString musicdir = settings.value( "files_music_dir", QDesktopServices::storageLocation( QDesktopServices::MusicLocation ) ).toString();
+    QFileDialog dialog( this, tr("Choose Audio Files"), musicdir );
     dialog.setFileMode( QFileDialog::ExistingFiles );
     dialog.setNameFilter( tr( "Audio files (*.mp3 *.m4a *.mp4 *.aac *.ogg *.oga *.wma *.flac)" ) );
 
@@ -161,6 +164,8 @@ void MainWindow::slotAddFiles()
     if ( dialog.exec() )
     {
         filenames = dialog.selectedFiles();
+        settings.setValue( "files_music_dir", dialog.directory().absolutePath() );
+        settings.sync();
     }
     if ( filenames.size() <= 0 )
         return;
@@ -175,7 +180,9 @@ void MainWindow::slotAddFiles()
 
 void MainWindow::slotAddFolders()
 {
-    QFileDialog dialog( this );
+    QSettings settings;
+    QString musicdir = settings.value( "folders_music_dir", QDesktopServices::storageLocation( QDesktopServices::MusicLocation ) ).toString();
+    QFileDialog dialog( this, tr("Choose Audio Folders"), musicdir );
     dialog.setFileMode( QFileDialog::Directory );
     dialog.setOption( QFileDialog::ShowDirsOnly, true );
 
@@ -183,6 +190,8 @@ void MainWindow::slotAddFolders()
     if ( dialog.exec() )
     {
         folders = dialog.selectedFiles();
+        settings.setValue( "folders_music_dir", dialog.directory().absolutePath() );
+        settings.sync();
     }
     if ( folders.size() <= 0 )
         return;
