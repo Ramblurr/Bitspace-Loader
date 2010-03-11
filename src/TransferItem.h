@@ -64,6 +64,7 @@ public:
 
 signals:
     void jobFinished( TransferItem* );
+    void itemChanged( TransferItem* );
 
 public slots:
     void slotUploadProgress( qint64, qint64 );

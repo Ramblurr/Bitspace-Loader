@@ -23,8 +23,6 @@
 
 FileModel::FileModel( QObject *parent ) :
         QAbstractTableModel( parent ),
-        m_currentActual( 0 ),
-        m_currentTotal( 0 ),
         m_uploadInProgress( 0 )
 {
 }
@@ -62,8 +60,8 @@ QVariant FileModel::data( const QModelIndex& index, int role ) const
     case Qt::ToolTipRole:
         if ( item->status() == Bitspace::InProgress )
         {
-            QString tp = tr( "%1 / %2 KB" ).arg( QString::number( m_currentActual / 1024 ), QString::number( m_currentTotal / 1024 ) );
-            return tp;
+//            QString tp = tr( "%1 / %2 KB" ).arg( QString::number( m_currentActual / 1024 ), QString::number( m_currentTotal / 1024 ) );
+//            return tp;
         }
         else
             return tr( "Pending" );
@@ -241,10 +239,13 @@ QString FileModel::stateToString( const Bitspace::ItemStates & state ) const
     }
 }
 
-void FileModel::slotUploadProgress( qint64 current, qint64 total )
+void FileModel::slotItemChanged( TransferItem* job )
 {
-    m_currentActual = current;
-    m_currentTotal = total;
+    if( job )
+    {
+        QModelIndex index = indexOf( job );
+        emit dataChanged(index, index);
+    }
 }
 
 void FileModel::slotStart()
@@ -286,6 +287,7 @@ void FileModel::slotStartNextJob()
 
     TransferItem* item = pending_files.takeFirst();
     connect(item, SIGNAL(jobFinished(TransferItem*)), this, SLOT(slotJobFinished(TransferItem*)));
+    connect(item, SIGNAL(itemChanged(TransferItem*)), this, SLOT(slotItemChanged(TransferItem*)));
     qDebug() << "Starting next job: " << item->filePath();
 
     // change the status for the item

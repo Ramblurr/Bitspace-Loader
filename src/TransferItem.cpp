@@ -77,6 +77,7 @@ void TransferItem::reset()
     m_runningSeconds = 0;
     m_errored = false;
     m_aborted = false;
+    emit itemChanged( this );
 }
 
 QString TransferItem::filePath() const
@@ -142,6 +143,7 @@ void TransferItem::slotUploadProgress( qint64 uploaded, qint64 total)
 {
         qDebug() << "Sent: " << uploaded << "Total:" << total;
     m_uploadedSize = uploaded;
+    emit itemChanged( this );
 }
 
 void TransferItem::slotUploadFinished()
@@ -185,4 +187,5 @@ void TransferItem::slotAbortJob()
     m_uploadedSize = 0;
     m_runningSeconds = 0;
     m_errored = false;
+    emit itemChanged( this );
 }

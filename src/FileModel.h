@@ -54,8 +54,8 @@ signals:
 public slots:
     void slotStart();
     void slotAbort();
+    void slotItemChanged( TransferItem* );
 
-    void slotUploadProgress( qint64, qint64 );
 private slots:
     void slotStartNextJob();
     void slotJobFinished( TransferItem* );
@@ -64,8 +64,6 @@ private:
     QString stateToString( const Bitspace::ItemStates & state ) const;
     TransferItemList m_list;
 
-    qint64 m_currentActual;
-    qint64 m_currentTotal;
     bool m_uploadInProgress;
 
 };
