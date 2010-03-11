@@ -48,6 +48,7 @@ MainWindow::MainWindow( QWidget *parent ) :
     m_model = new FileModel( this );
     connect( m_model, SIGNAL( dataChanged( QModelIndex, QModelIndex ) ), this, SLOT( slotItemsChanged() ) );
     connect( this, SIGNAL(abort()), m_model, SLOT(slotAbort()));
+    connect( this, SIGNAL(abort()), this, SLOT(slotAbortUpload()));
     ui->tableView->setModel( m_model );
     ui->tableView->horizontalHeader()->setResizeMode( QHeaderView::ResizeToContents );
 
@@ -273,49 +274,6 @@ void MainWindow::on_m_uploadAction_triggered()
     setUploadIcon();
 }
 
-void MainWindow::slotStartNextJob()
-{
-//    qDebug() << "MainWindow::slotStartNextJob()";
-//    QStringList pending_files = m_model->getPending();
-//    if ( pending_files.size() <= 0 )
-//    {
-//        m_uploadInProgress = false;
-//        qDebug() << "No more Pending files. Done.";
-//        return;
-//    }
-//    m_uploadInProgress = true;
-//
-//    QString file = pending_files.takeFirst();
-//    qDebug() << "Starting next job: " << file;
-//
-//    // change the status for the item
-//    QModelIndex index = m_model->indexOf( file );
-//    m_model->setData( index, Bitspace::InProgress, Qt::EditRole );
-//
-//    setUploadIcon();
-//
-//    bool success = m_uploader->upload( file );
-//    if ( !success )
-//        return; // TODO error handling
-}
-
-//void MainWindow::slotUploadFinished()
-//{
-//    qDebug() << "MainWindow::slotUploadFinished()";
-//
-//    QStringList inprogress_files = m_model->getInProgress();
-//    foreach( QString file, inprogress_files )
-//    {
-//        // change the status for the item
-//        QModelIndex index = m_model->indexOf( file );
-//        m_model->setData( index, Bitspace::Complete, Qt::EditRole );
-//    }
-//
-//    if ( m_uploadInProgress )
-//        slotStartNextJob();
-//    setUploadIcon();
-//}
-
 void MainWindow::slotUploadError( QString error )
 {
     qDebug() << "slotUploadError" << error;
@@ -345,18 +303,7 @@ void MainWindow::setUploadIcon()
 
 void MainWindow::slotAbortUpload()
 {
-//    qDebug() << "MainWindow::slotAbortUpload()";
-//    m_uploadInProgress = false;
-//
-//    QStringList inprogress_files = m_model->getInProgress();
-//    foreach( QString file, inprogress_files )
-//    {
-//        // change the status for the item
-//        QModelIndex index = m_model->indexOf( file );
-//        m_model->setData( index, Bitspace::Pending, Qt::EditRole );
-//    }
     setUploadIcon();
-    emit abort();
 }
 
 void MainWindow::slotItemsChanged()

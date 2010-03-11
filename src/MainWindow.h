@@ -44,9 +44,6 @@ protected:
     void changeEvent( QEvent *e );
     void closeEvent( QCloseEvent *event );
 
-public slots:
-    void slotStartNextJob();
-
 private slots:
     void on_actionOptions_triggered();
     void on_actionQuit_triggered();
