@@ -160,7 +160,7 @@ bool FileModel::removeRows( int position, int rows, const QModelIndex &index )
     for ( int row = 0; row < rows; ++row )
     {
         TransferItem* item = m_list.takeAt( position );
-        delete item;
+        item->deleteLater();
     }
 
     endRemoveRows();
@@ -207,6 +207,30 @@ TransferItemList FileModel::getInProgress() const
             files << item;
     }
     return files;
+}
+
+TransferItemList FileModel::getComplete() const
+{
+    TransferItemList files;
+    foreach( TransferItem* item, m_list )
+    {
+        if ( item->status() == Bitspace::Complete )
+            files << item;
+    }
+    return files;
+}
+
+void FileModel::removeComplete()
+{
+    for( int i = 0; i < m_list.size(); i++ )
+    {
+        TransferItem* item = m_list.at( i );
+        if( item->status() == Bitspace::Complete )
+        {
+            QModelIndex idx = index(i, 0, QModelIndex() );
+            removeRow( idx.row() );
+        }
+    }
 }
 
 bool FileModel::isTransferring() const

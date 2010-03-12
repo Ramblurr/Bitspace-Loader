@@ -37,6 +37,7 @@ public:
     virtual bool insertRows( int position, int rows, const QModelIndex &index = QModelIndex() );
     virtual bool removeRows( int position, int rows, const QModelIndex &index = QModelIndex() );
 
+    void removeComplete();
     /**
       * returns a QModelIndex for the file name. the column defaults to 1, which
       * will be the index for the ItemState
@@ -45,6 +46,7 @@ public:
     TransferItemList getAll() const;
     TransferItemList getPending() const;
     TransferItemList getInProgress() const;
+    TransferItemList getComplete() const;
 
     bool isTransferring() const;
     bool contains( const QString &file ) const;
