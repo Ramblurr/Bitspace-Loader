@@ -102,15 +102,23 @@ void MainWindow::setupActions()
     m_uploadAction = new QAction( QIcon::fromTheme( "go-up" ) , tr( "Start Upload" ), this );
     m_quitAction = new QAction( tr( "&Quit" ), this );
 
+    QAction* deleteSelectedAction = new QAction( QIcon::fromTheme("edit-delete"), tr("Remove Selected"), this);
+    QAction* deleteAllCompleteAction = new QAction( QIcon::fromTheme("edit-clear-list"), tr("Remove All Complete"), this);
+
     ui->mainToolBar->addAction( m_addFiles );
     ui->mainToolBar->addAction( m_addFolders );
     ui->mainToolBar->addSeparator();
     ui->mainToolBar->addAction( m_uploadAction );
+    ui->mainToolBar->addSeparator();
+    ui->mainToolBar->addAction( deleteSelectedAction );
+    ui->mainToolBar->addAction( deleteAllCompleteAction );
 
     connect( m_addFiles, SIGNAL( triggered() ), SLOT( slotAddFiles() ) );
     connect( m_addFolders, SIGNAL( triggered() ), SLOT( slotAddFolders() ) );
     connect( m_uploadAction, SIGNAL( triggered() ), SLOT( on_m_uploadAction_triggered() ) );
     connect( m_quitAction, SIGNAL( triggered() ), qApp, SLOT( quit() ) );
+    connect(deleteSelectedAction, SIGNAL(triggered()), SLOT(slotDeleteSelected()));
+    connect(deleteAllCompleteAction, SIGNAL(triggered()), SLOT(slotDeleteComplete()));
 }
 
 void MainWindow::createTrayIcon()
@@ -322,4 +330,18 @@ void MainWindow::slotItemsChanged()
         m_uploadAction->setEnabled( true );
     else
         m_uploadAction->setEnabled( false );
+}
+
+void MainWindow::slotDeleteComplete()
+{
+    m_model->removeComplete();
+}
+
+void MainWindow::slotDeleteSelected()
+{
+    QModelIndexList list = ui->tableView->selectionModel()->selectedRows();
+    foreach(QModelIndex idx, list)
+    {
+        m_model->removeRow( idx.row() );
+    }
 }

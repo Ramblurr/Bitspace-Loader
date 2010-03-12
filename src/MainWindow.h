@@ -56,6 +56,8 @@ private slots:
     void slotAbortUpload();
     void slotIconActivated( QSystemTrayIcon::ActivationReason );
     void slotItemsChanged();
+    void slotDeleteSelected();
+    void slotDeleteComplete();
 private:
     void setupActions();
 
