@@ -51,8 +51,12 @@ MainWindow::MainWindow( QWidget *parent ) :
     connect( this, SIGNAL(abort()), m_model, SLOT(slotAbort()));
     connect( this, SIGNAL(abort()), this, SLOT(slotAbortUpload()));
     ui->tableView->setModel( m_model );
-    ui->tableView->horizontalHeader()->setResizeMode( QHeaderView::ResizeToContents );
+    ui->tableView->horizontalHeader()->setMinimumSectionSize(80);
+    ui->tableView->setColumnWidth(0 , 550);
+    ui->tableView->setColumnWidth(2 , 50);
     ui->tableView->setShowGrid( false );
+    ui->tableView->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+    ui->tableView->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
 
     slotOptionsChanged();
     FileDelegate* delegate = new FileDelegate( this );
